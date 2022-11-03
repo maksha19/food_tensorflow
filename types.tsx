@@ -1,6 +1,6 @@
 export type RootStackParamList = {
   Home:undefined,
-  Root: undefined;
+  Merchant: undefined;
   Beneficiary: undefined;
   NotFound: undefined;
 };

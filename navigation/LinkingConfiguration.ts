@@ -4,7 +4,7 @@ export default {
   prefixes: [Linking.makeUrl("/")],
   config: {
     screens: {
-      Root: {
+      Merchant: {
         screens: {
           TabOne: {
             screens: {
@@ -28,7 +28,30 @@ export default {
           },
         },
       },
-      Beneficiary:{},
+      Beneficiary:{
+        screens: {
+          TabOne: {
+            screens: {
+              TabOneScreen: "one",
+            },
+          },
+          TabTwo: {
+            screens: {
+              TabTwoScreen: "two",
+            },
+          },
+          TabThree: {
+            screens: {
+              TabThreeScreen: "three",
+            },
+          },
+          TabFour: {
+            screens: {
+              TabFourScreen: "four",
+            },
+          },
+        },
+      },
       NotFound: "*",
     },
   },
