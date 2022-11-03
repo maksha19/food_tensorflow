@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "myLittleProject",
-    "slug": "myLittleProject",
+    "name": "food",
+    "slug": "food",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
