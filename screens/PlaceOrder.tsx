@@ -9,6 +9,7 @@ import {
   Image,
   TouchableOpacity,
   ImageSourcePropType,
+  ViewBase,
 } from "react-native";
 import { Card } from "react-native-elements";
 
@@ -110,7 +111,10 @@ const PlaceOrder = () => {
               style={{ width: "100%", margin: 20, alignItems: "center" }}
               key={k}
             >
-              <TouchableOpacity style={styles.cardList} key={k}>
+              <View
+                style={[styles.cardList, { height: 180, padding: 10 }]}
+                key={k}
+              >
                 <View style={{ display: "flex", flexDirection: "row" }}>
                   <View style={{ marginRight: 10 }}>
                     <Image
@@ -124,17 +128,39 @@ const PlaceOrder = () => {
                     <Text>Expire Date: {v.date}</Text>
                   </View>
                 </View>
-                <View style={{}}>
-                  <TouchableOpacity
-                    onPress={() => undefined }
-                   style={styles.link}
-                  >
-                    <Text style={styles.linkText}>
-                      add to cart
-                    </Text>
-                  </TouchableOpacity>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    backgroundColor: "red",
+                    width: "100%",
+                  }}
+                >
+                  <View style={{ flex: 0.5, flexDirection: "row" }}>
+                    <Text>-</Text>
+                    <Text>+</Text>
+                  </View>
+                  <View style={{ flex: 0.5 }}>
+                    <View>
+                      <TouchableOpacity
+                        onPress={() => undefined}
+                        style={[
+                          styles.link,
+                          {
+                            margin: 0,
+                            paddingVertical: 0,
+                            alignItems: "center",
+                          },
+                        ]}
+                      >
+                        <Text style={[styles.linkText, { padding: 5 }]}>
+                          Add to Cart
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                 </View>
-              </TouchableOpacity>
+              </View>
             </View>
           );
         })}
@@ -167,7 +193,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ecf0f1",
   },
   cardList: {
-    height: 150,
+    height: 100,
     width: "70%",
     borderColor: "rgba(0, 0, 0, 0.125)",
     borderWidth: 1,
@@ -185,16 +211,16 @@ const styles = StyleSheet.create({
     color: "#34495e",
   },
   link: {
-
-
+    margin: 20,
+    paddingVertical: 15,
     backgroundColor: "#2e78b7",
-    borderRadius: 5,
+    borderRadius: 10,
     width: "60%",
   },
   linkText: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#fff",
-    padding: 5
+    padding: 16,
   },
 });
