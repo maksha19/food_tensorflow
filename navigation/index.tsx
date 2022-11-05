@@ -38,7 +38,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {/* <Stack.Screen name="Home" component={HomeScreen} /> */}
+      <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen
         name="Beneficiary"
         component={BeneficiaryBottomTabNavigator}
