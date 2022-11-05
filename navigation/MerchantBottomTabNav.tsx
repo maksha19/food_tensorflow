@@ -18,7 +18,7 @@ export default function MerchantBottomTabNavigator() {
 
   return (
     <BottomTab.Navigator
-      initialRouteName="ManageOrder"
+      initialRouteName="InventoryItems"
       // tabBarOptions={{ activeTintColor: Colors[colorScheme].tint }}
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].tint,
@@ -31,16 +31,6 @@ export default function MerchantBottomTabNavigator() {
       }}
     >
       <BottomTab.Screen
-        name="ManageOrder"
-        component={ManageOrder}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="inbox" color={color} />
-          ),
-          tabBarLabel: "Manage Orders",
-        }}
-      />
-      <BottomTab.Screen
         name="InventoryItems"
         component={InventoryItems}
         options={{
@@ -50,6 +40,17 @@ export default function MerchantBottomTabNavigator() {
           tabBarLabel: "Inventory Items",
         }}
       />
+      <BottomTab.Screen
+        name="ManageOrder"
+        component={ManageOrder}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="inbox" color={color} />
+          ),
+          tabBarLabel: "Manage Orders",
+        }}
+      />
+
     </BottomTab.Navigator>
   );
 }
