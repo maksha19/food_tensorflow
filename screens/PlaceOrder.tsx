@@ -5,7 +5,6 @@ import {
   View,
   Image,
   TouchableOpacity,
-
   TextInput,
   ScrollView,
   KeyboardAvoidingView,
