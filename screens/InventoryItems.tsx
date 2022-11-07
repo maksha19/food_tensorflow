@@ -31,7 +31,7 @@ const InventoryItems = () => {
   const [isTfReady, setIsTfReady] = useState(false)
   const [isModelReady, setIsModelReady] = useState(false)
   const [predictions, setPredictions] = useState<DetectedObject[] | undefined>()
-  const [totalCount, setTotalCount] = useState(0)
+
   const [image, setImage] = useState<any>(null)
   const model = useRef<ObjectDetection | null>(null)
   const webref = useRef<WebView | null>(null)
@@ -39,14 +39,18 @@ const InventoryItems = () => {
   const [isFormSubmitted, setIsFormSubmitted] = useState(false)
 
   const [categoryOpen, setCategoryOpen] = useState(false);
-  const [categoryValue, setCategoryValue] = useState(null);
   const [category, setCategory] = useState([
     { label: "Dairy", value: "Dairy" },
     { label: "Vegies", value: "Vegies" },
     { label: "Sweeet", value: "Sweeet" },
     { label: "Othes", value: "Others" },
   ]);
-  const { handleSubmit, control,setValue } = useForm();
+
+  const [categoryValue, setCategoryValue] = useState<string|null>(null);
+  const [price, setPrice] = useState('')
+  const [totalCount, setTotalCount] = useState('0')
+  const [expireDate, setExpireDate]= useState('')
+
 
 
 
@@ -98,9 +102,8 @@ const InventoryItems = () => {
         }
       })
       // TODO : get date and price from image 
-      setTotalCount(count)
+      setTotalCount(count.toString())
       setIsPredictStart(false)
-      setValue('count',count, {shouldValidate:true})
       console.log(predictions)
     } catch (error) {
       console.log('classifyImage error', error)
@@ -138,8 +141,8 @@ const InventoryItems = () => {
   }
 
 
-  const onSubmit = (data: any) => {
-    console.log(data, 'data');
+  const onSubmit = () => {
+    console.log({categoryValue,price,totalCount,expireDate}, 'data');
     setIsFormSubmitted(true)
   };
 
@@ -235,12 +238,7 @@ const InventoryItems = () => {
       </View> */}
           <View>
             <Text style={styles.label}>Category</Text>
-            <Controller
-              name="category"
-              defaultValue=""
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <View style={styles.dropdownCategory}>
+            <View style={styles.dropdownCategory}>
                   <DropDownPicker
                     style={styles.dropdown}
                     open={categoryOpen}
@@ -251,56 +249,32 @@ const InventoryItems = () => {
                     setItems={setCategory}
                     placeholder="Select Category"
                     placeholderStyle={styles.placeholderStyles}
-                    onChangeValue={onChange}
+                    onChangeValue={text=>setCategoryValue(text)}
                   />
                 </View>
-              )}
-            />
-
             <Text style={styles.label}>Price</Text>
-            <Controller
-              name="price"
-              defaultValue=""
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <TextInput
+            <TextInput
                   style={styles.input}
                   selectionColor={'#5188E3'}
-                  onChangeText={onChange}
-                  value={value}
+                  onChangeText={text=>setPrice(text)}
+                  value={price}
                 />
-              )}
-            />
 
             <Text style={styles.label}>Count</Text>
-            <Controller
-              name="count"
-              defaultValue={totalCount}
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <TextInput
+            <TextInput
                   style={styles.input}
                   selectionColor={'#5188E3'}
-                  onChangeText={onChange}
-                  value={value}
+                  onChangeText={text=> setTotalCount(text)}
+                  value={totalCount}
                 />
-              )}
-            />
            <Text style={styles.label}>Expire Date</Text>
-            <Controller
-              name="expireDate"
-              defaultValue=''
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <TextInput
+           <TextInput
                   style={styles.input}
                   selectionColor={'#5188E3'}
-                  onChangeText={onChange}
-                  value={value}
+                  onChangeText={text=> setExpireDate(text)}
+                  value={expireDate}
                 />
-              )}
-            />
-            <TouchableOpacity style={styles.submitButton} disabled={totalCount===0} onPress={handleSubmit(onSubmit)}>
+            <TouchableOpacity style={styles.submitButton} disabled={parseInt(totalCount)===0} onPress={handleSubmit(onSubmit)}>
                <Text style={[styles.text, {color:'#fff', textAlign: 'center' }]}>
                 {isPredictStart ? "Predicting...":"Submit"}                
                 </Text>
