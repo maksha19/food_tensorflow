@@ -274,7 +274,7 @@ const InventoryItems = () => {
                   onChangeText={text=> setExpireDate(text)}
                   value={expireDate}
                 />
-            <TouchableOpacity style={styles.submitButton} disabled={parseInt(totalCount)===0} onPress={handleSubmit(onSubmit)}>
+            <TouchableOpacity style={styles.submitButton} disabled={parseInt(totalCount)===0} onPress={onSubmit}>
                <Text style={[styles.text, {color:'#fff', textAlign: 'center' }]}>
                 {isPredictStart ? "Predicting...":"Submit"}                
                 </Text>
