@@ -8,7 +8,6 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
-  Keyboard,
   Platform,
   ScrollView,
   KeyboardAvoidingView,
@@ -24,18 +23,20 @@ import { MEDIA_LIBRARY } from 'expo-permissions'
 import { DetectedObject, ObjectDetection } from "@tensorflow-models/coco-ssd";
 import { WebView } from 'react-native-webview'
 import DropDownPicker from 'react-native-dropdown-picker';
+import Toast from 'react-native-toast-message';
+import axios from "axios";
 
 const InventoryItems = () => {
 
   const [isTfReady, setIsTfReady] = useState(false)
   const [isModelReady, setIsModelReady] = useState(false)
-  const [predictions, setPredictions] = useState<DetectedObject[] | undefined>()
+  // const [predictions, setPredictions] = useState<DetectedObject[] | undefined>()
 
   const [image, setImage] = useState<any>(null)
   const model = useRef<ObjectDetection | null>(null)
   const webref = useRef<WebView | null>(null)
-  const [isPredictStart, setIsPredictStart] = useState(false)
-  const [isFormSubmitted, setIsFormSubmitted] = useState(false)
+  const [isCocoPredictStart, setIsCocoPredictStart] = useState(false)
+  const [isTesseractPredictStart,setIsTesseractPredictStart] = useState(false)
 
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [category, setCategory] = useState([
@@ -50,9 +51,6 @@ const InventoryItems = () => {
   const [price, setPrice] = useState('')
   const [totalCount, setTotalCount] = useState('0')
   const [expireDate, setExpireDate] = useState('')
-
-
-
 
 
   useEffect(() => {
@@ -94,7 +92,7 @@ const InventoryItems = () => {
       const rawImageData = await response.arrayBuffer()
       const imageTensor = imageToTensor(rawImageData)
       const predictions = await model.current?.detect(imageTensor)
-      setPredictions(predictions)
+      // setPredictions(predictions)
       let count = 0
       predictions?.forEach(item => {
         if ((Math.round(item.score * 100)) > 50) {
@@ -102,14 +100,14 @@ const InventoryItems = () => {
         }
       })
       setTotalCount(count.toString())
-      setIsPredictStart(false)
+      setIsCocoPredictStart(false)
       console.log(predictions)
-      if(predictions && predictions?.length> 0){
+      if (predictions && predictions?.length > 0) {
         setItemClass(predictions[0].class)
       }
     } catch (error) {
       console.log('classifyImage error', error)
-      setIsPredictStart(false)
+      setIsCocoPredictStart(false)
     }
   }
 
@@ -124,24 +122,23 @@ const InventoryItems = () => {
 
       if (!response.cancelled) {
         const source = { uri: response.uri }
-        // console.log('source', source)
         setImage(source)
-        setIsPredictStart(true)
+        setIsCocoPredictStart(true)
         classifyImage(response.uri)
-        
+
         // to get expireDate and price information from tesseract model
-        const imageBabe64 = `data:image/jpg;base64,${response.base64}`        
+        const imageBabe64 = `data:image/jpg;base64,${response.base64}`
         webref.current?.injectJavaScript(
           getInjectableJSMessage(imageBabe64)
-      );     
+        );
       }
     } catch (error) {
       console.log('selectImage error', error)
-      setIsPredictStart(false)
+      setIsCocoPredictStart(false)
     }
   }
 
-  function getInjectableJSMessage(message:any) {
+  function getInjectableJSMessage(message: any) {
     return `
       (function() {
         document.dispatchEvent(new MessageEvent('message', {
@@ -150,34 +147,64 @@ const InventoryItems = () => {
       })();
     `;
   }
-  
 
 
+  const onSubmit = async () => {
+    console.log({ categoryValue, price, totalCount, expireDate, item: itemClass }, 'data');
 
-  const onSubmit = () => {
-    console.log({ categoryValue, price, totalCount, expireDate ,item: itemClass }, 'data');
-    setIsFormSubmitted(true)
+
+    const url =
+      "https://script.google.com/macros/s/AKfycbyiGvUENeo-vPuKF_YFJ5b0Ht5r7MEFgwrGRvWpsD-_plf1zdDcDdnLknvRlAc9vNM-GQ/exec";
+    const response = await axios.post(
+      url,
+      { categoryValue, price, totalCount, expireDate, item: itemClass },
+      {
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
+      }
+    );
+    if (response.status === 200) {
+      const statusCode = response.data.statusCode;
+      if (statusCode === "201") {
+        Toast.show({
+          type: 'success',
+          text1: '👋  Iventory Saved Successfully ',
+        });  
+        setTimeout(() => {
+          setCategoryValue(null)
+          setItemClass('')
+          setPrice('')
+          setTotalCount('0')
+          setExpireDate('')
+          setImage(null)
+        }, 1000)
+
+      }}
+
+
   };
 
   const onMessage = (event: any) => {
-    const data :string = event.nativeEvent.data.toString()
-    data.split("\\n").forEach((v:string)=>{  
-      console.log('v',v)
-       const item = v.split(':')
-       console.log('item',item)
-       if(item && item[0].toUpperCase().includes('EXPIRE')){
-        console.log('expire',item)
+    const data: string = event.nativeEvent.data.toString()
+    data.split("\\n").forEach((v: string) => {
+      console.log('v', v)
+      const item = v.split(':')
+      console.log('item', item)
+      if (item && item[0].toUpperCase().includes('EXPIRE')) {
+        console.log('expire', item)
         setExpireDate(item[1].trim())
-       }
-       if(item && item[0].toUpperCase().includes('PRICE')){
-        console.log('expire',item)
+      }
+      if (item && item[0].toUpperCase().includes('PRICE')) {
+        console.log('expire', item)
         setPrice(item[1].trim())
-       }
+      }
     })
+    setIsTesseractPredictStart(true)
     // console.log('INJECTED_JAVASCRIPT', event.nativeEvent.data)
   }
 
-  
+
   const html = `
 <html>
     <head>
@@ -317,12 +344,16 @@ label{
               />
               <TouchableOpacity style={styles.submitButton} disabled={parseInt(totalCount) === 0} onPress={onSubmit}>
                 <Text style={[styles.text, { color: '#fff', textAlign: 'center' }]}>
-                  {isPredictStart ? "Predicting..." : "Submit"}
+                  {isCocoPredictStart && isTesseractPredictStart ? "Predicting..." : "Submit"}
                 </Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
         </View>
+        <Toast
+          position='bottom'
+          bottomOffset={30}
+        />
       </KeyboardAvoidingView>
     </>
   )

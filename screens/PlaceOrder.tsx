@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { EvilIcons } from '@expo/vector-icons';
 
-type StatusTypes = "CATEGORY" | "VIEW" | "ORDER" |  "SUCCESS";
+type StatusTypes = "CATEGORY" | "VIEW" | "ORDER" | "SUCCESS";
 type CategoryTypes = "Dairy" | "Vegies" | "Sweeet" | "Others";
 type ItemsValuesTypes = {
   name: string;
@@ -255,9 +255,9 @@ const PlaceOrder = () => {
     setCurrentState('ORDER')
   }
 
-  const placeOrder =  ()=> {
+  const placeOrder = () => {
     setCurrentState('SUCCESS')
-    }
+  }
 
 
   const itemViewState = (category: CategoryTypes) => {
@@ -268,7 +268,7 @@ const PlaceOrder = () => {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
-    style={{flex: 1}}>
+      style={{ flex: 1 }}>
       <View style={styles.container}>
         {currentState !== "ORDER" && currentState !== "SUCCESS" &&
           <View>
@@ -280,35 +280,39 @@ const PlaceOrder = () => {
           </View>}
         {currentState === "CATEGORY" && categoriesScreen()}
         {currentState === "VIEW" &&
-          ItemsValues && ItemsValues.length > 0 && (
-            <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems:'center'}}>
+          (ItemsValues && ItemsValues.length > 0 ? (
+            <ScrollView style={styles.scrollView} contentContainerStyle={{ alignItems: 'center' }}>
               {ItemsValues.map((v, k) =>
                 <ViewsScreen k={k} selectedItem={v} addToCart={addTocart} />)}
             </ScrollView>
-          )
+          ) :
+            (
+              <><Text style={[styles.linkText, { color: '#000' }]}>No Item in these categories</Text></>
+
+            ))
         }
         {
           currentState === "ORDER" && (orderItems && orderItems.length > 0 ? (
             <>
-     
-             <ScrollView style={styles.scrollView} contentContainerStyle={{alignItems:'center'}}>
+
+              <ScrollView style={styles.scrollView} contentContainerStyle={{ alignItems: 'center' }}>
                 {orderItems.map((v, k) =>
                   <OrderScreen k={k} orderItem={v} />)}
               </ScrollView>
               <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <>
-              <Text>
-                I would like to pick up my groceries at:
-              </Text>
-              <TextInput style={styles.input} onChangeText={text=>onChangeTimeText(text)} value={time} />
-              </>
+                  <Text>
+                    I would like to pick up my groceries at:
+                  </Text>
+                  <TextInput style={styles.input} onChangeText={text => onChangeTimeText(text)} value={time} />
+                </>
               </TouchableWithoutFeedback>
 
-              <TouchableOpacity style={{ backgroundColor: '#f48225', borderRadius: 20 ,margin:10 }}
+              <TouchableOpacity style={{ backgroundColor: '#f48225', borderRadius: 20, margin: 10 }}
                 onPress={() => placeOrder()}>
                 <Text style={styles.linkText}>Place Order</Text>
               </TouchableOpacity>
-            
+
             </>
 
           ) : (
@@ -318,9 +322,9 @@ const PlaceOrder = () => {
         }
         {
           currentState === "SUCCESS" && <>
-          <Text style={[styles.linkText, { color: '#000' }]}>Your Order has beed Placed</Text>
-          <Text style={[styles.linkText, { color: '#000' }]}>Please pick up before {time}</Text>
-          <Text style={[styles.linkText, { color: '#000' }]}>Thank You! </Text>
+            <Text style={[styles.linkText, { color: '#000' }]}>Your Order has beed Placed</Text>
+            <Text style={[styles.linkText, { color: '#000' }]}>Please pick up before {time}</Text>
+            <Text style={[styles.linkText, { color: '#000' }]}>Thank You! </Text>
           </>
         }
       </View>
@@ -375,7 +379,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    width:150,
+    width: 150,
     margin: 12,
     borderWidth: 1,
     padding: 10,
