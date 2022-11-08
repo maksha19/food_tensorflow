@@ -23,7 +23,6 @@ import * as Permissions from 'expo-permissions'
 import { MEDIA_LIBRARY } from 'expo-permissions'
 import { DetectedObject, ObjectDetection } from "@tensorflow-models/coco-ssd";
 import { WebView } from 'react-native-webview'
-import { useForm, Controller } from 'react-hook-form';
 import DropDownPicker from 'react-native-dropdown-picker';
 
 const InventoryItems = () => {
@@ -46,10 +45,11 @@ const InventoryItems = () => {
     { label: "Othes", value: "Others" },
   ]);
 
-  const [categoryValue, setCategoryValue] = useState<string|null>(null);
+  const [categoryValue, setCategoryValue] = useState<string | null>(null);
+  const [itemClass, setItemClass] = useState('')
   const [price, setPrice] = useState('')
   const [totalCount, setTotalCount] = useState('0')
-  const [expireDate, setExpireDate]= useState('')
+  const [expireDate, setExpireDate] = useState('')
 
 
 
@@ -101,10 +101,12 @@ const InventoryItems = () => {
           count++;
         }
       })
-      // TODO : get date and price from image 
       setTotalCount(count.toString())
       setIsPredictStart(false)
       console.log(predictions)
+      if(predictions && predictions?.length> 0){
+        setItemClass(predictions[0].class)
+      }
     } catch (error) {
       console.log('classifyImage error', error)
       setIsPredictStart(false)
@@ -114,6 +116,7 @@ const InventoryItems = () => {
   const selectImage = async () => {
     try {
       let response = await ImagePicker.launchImageLibraryAsync({
+        base64: true,
         mediaTypes: ImagePicker.MediaTypeOptions.All,
         allowsEditing: true,
         aspect: [4, 3]
@@ -121,10 +124,16 @@ const InventoryItems = () => {
 
       if (!response.cancelled) {
         const source = { uri: response.uri }
-        console.log('source', source)
+        // console.log('source', source)
         setImage(source)
         setIsPredictStart(true)
         classifyImage(response.uri)
+        
+        // to get expireDate and price information from tesseract model
+        const imageBabe64 = `data:image/jpg;base64,${response.base64}`        
+        webref.current?.injectJavaScript(
+          getInjectableJSMessage(imageBabe64)
+      );     
       }
     } catch (error) {
       console.log('selectImage error', error)
@@ -132,166 +141,190 @@ const InventoryItems = () => {
     }
   }
 
-  const renderPrediction = () => {
-    return (
-      <Text style={styles.text}>
-        {totalCount}
-      </Text>
-    )
+  function getInjectableJSMessage(message:any) {
+    return `
+      (function() {
+        document.dispatchEvent(new MessageEvent('message', {
+          data: ${JSON.stringify(message)}
+        }));
+      })();
+    `;
   }
+  
+
 
 
   const onSubmit = () => {
-    console.log({categoryValue,price,totalCount,expireDate}, 'data');
+    console.log({ categoryValue, price, totalCount, expireDate ,item: itemClass }, 'data');
     setIsFormSubmitted(true)
   };
 
-  const onMessage = (args: any) => {
-    console.log('INJECTED_JAVASCRIPT', args)
+  const onMessage = (event: any) => {
+    const data :string = event.nativeEvent.data.toString()
+    data.split("\\n").forEach((v:string)=>{  
+      console.log('v',v)
+       const item = v.split(':')
+       console.log('item',item)
+       if(item && item[0].toUpperCase().includes('EXPIRE')){
+        console.log('expire',item)
+        setExpireDate(item[1].trim())
+       }
+       if(item && item[0].toUpperCase().includes('PRICE')){
+        console.log('expire',item)
+        setPrice(item[1].trim())
+       }
+    })
+    // console.log('INJECTED_JAVASCRIPT', event.nativeEvent.data)
   }
-  //   const INJECTED_JAVASCRIPT = `(function() {
-  //     window.ReactNativeWebView.postMessage(JSON.stringify({a:'mani'}));
-  // })();`;
 
+  
   const html = `
 <html>
     <head>
-        <title>Tesseract-JS Demo</title>
+        <title>food</title>
 		<meta charset="UTF-8">
 		<meta name="description" content="A simple demonstration of Tesseract JS">
 		<meta name="keywords" content="Tesseract,OCR,JavaScript">
 		<meta name="author" content="Akshay Khale">
     </head>
+    <style>
+body {
+  display: flex;
+  height: "100vh";
+  justify-content: center;
+  align-items: center;
+  font-size: "12000px";
+}
+
+div {
+  transform: scale(1);
+}
+label{
+  size: 50px;
+}
+</style>
     <body>
+    <div id="input_image_div">
         <label for="input_image">Choose an Image File:</label>
-        <input type="file" id="input_image" name="input_image"/>
-        <br />
-        <br />
-        <textarea id="image-text"></textarea>
+         <input id="input_image" type="file" name="input_image"/>
+
 		<br/><br/>
 		<progress id="progressbar" min="0" max="1" value="0"/>
+    </div>
     </body>
 	<script src='https://cdn.rawgit.com/naptha/tesseract.js/1.0.10/dist/tesseract.js'></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function(){
-            var input_image = document.getElementById('input_image');
-            input_image.addEventListener('change', handleInputChange);
-        });
-
-        function handleInputChange(event){
-            var input = event.target;
-            var file = input.files[0];
-            console.log(file);
-            Tesseract.recognize(file)
-                .progress(function(message){
-					document.getElementById('progressbar').value = message.progress;
-                    console.log(message);
-                })
-                .then(function(result){
-                    var contentArea = document.getElementById('image-text');
-					contentArea.innerHTML = result.text;
-                    console.log(result);
-                })
-                .catch(function(err){
-                    console.error(err);
-                });
-        }
+    function handleEvent(message) {
+      Tesseract.recognize(message.data)
+      .progress(function(message){
+        document.getElementById('progressbar').value = message.progress;
+          console.log(message);
+      })
+      .then(function(result){
+          window.ReactNativeWebView.postMessage(JSON.stringify(result.text));
+      })
+      .catch(function(err){
+          console.error(err);
+      });
+   }
+   document.addEventListener("message", handleEvent);
     </script>
 </html>
 `;
 
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <StatusBar barStyle='light-content' />
-        <View style={styles.loadingContainer}>
-          <Text style={[styles.text,{marginRight:10}]}>
-            AI Engine ready? {isTfReady ? <Text>✅</Text> : ''}
-          </Text>
+    <>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}>
+
+        <View style={styles.container}>
+          <StatusBar barStyle='light-content' />
+          <View style={styles.loadingContainer}>
+            <Text style={[styles.text, { marginRight: 10 }]}>
+              AI Engine ready? {isTfReady ? <Text>✅</Text> : ''}
+            </Text>
             <Text style={styles.text}>Model ready? </Text>
             {isModelReady ? (
               <Text style={styles.text}>✅</Text>
             ) : (
               <ActivityIndicator size='small' />
             )}
-        </View>
-        <ScrollView style={styles.scrollView} contentContainerStyle={{ alignItems: 'center' }}>
-          <TouchableOpacity
-            style={styles.imageWrapper}
-            onPress={isModelReady ? selectImage : undefined}>
-            {image && <Image source={image} style={styles.imageContainer} />}
-
-            {isModelReady && !image && (
-              <Text style={styles.transparentText}>Tap to choose image</Text>
-            )}
-          </TouchableOpacity>
-          {/* <View style={styles.predictionWrapper}>
-        {isModelReady && image && (
-          <Text style={styles.text}>
-            Predictions: {predictions ? '' : 'Predicting...'}
-          </Text>
-        )}
-        {isModelReady &&
-          totalCount > 0 && renderPrediction()}
-      </View> */}
-          <View>
-            <Text style={styles.label}>Category</Text>
-            <View style={styles.dropdownCategory}>
-                  <DropDownPicker
-                    style={styles.dropdown}
-                    open={categoryOpen}
-                    value={categoryValue}
-                    items={category}
-                    setOpen={setCategoryOpen}
-                    setValue={setCategoryValue}
-                    setItems={setCategory}
-                    placeholder="Select Category"
-                    placeholderStyle={styles.placeholderStyles}
-                    onChangeValue={text=>setCategoryValue(text)}
-                  />
-                </View>
-            <Text style={styles.label}>Price</Text>
-            <TextInput
-                  style={styles.input}
-                  selectionColor={'#5188E3'}
-                  onChangeText={text=>setPrice(text)}
-                  value={price}
-                />
-
-            <Text style={styles.label}>Count</Text>
-            <TextInput
-                  style={styles.input}
-                  selectionColor={'#5188E3'}
-                  onChangeText={text=> setTotalCount(text)}
-                  value={totalCount}
-                />
-           <Text style={styles.label}>Expire Date</Text>
-           <TextInput
-                  style={styles.input}
-                  selectionColor={'#5188E3'}
-                  onChangeText={text=> setExpireDate(text)}
-                  value={expireDate}
-                />
-            <TouchableOpacity style={styles.submitButton} disabled={parseInt(totalCount)===0} onPress={onSubmit}>
-               <Text style={[styles.text, {color:'#fff', textAlign: 'center' }]}>
-                {isPredictStart ? "Predicting...":"Submit"}                
-                </Text>
-            </TouchableOpacity>
           </View>
-        </ScrollView>
-        <>
-          <WebView
-            ref={(r) => (webref.current = r)}
-            originWhitelist={['*']}
-            source={{ html, headers: {} }}
-            // injectedJavaScript={INJECTED_JAVASCRIPT}
-            onMessage={onMessage}
-          />
-        </>
-      </View>
-    </KeyboardAvoidingView>
+
+          <ScrollView style={styles.scrollView} contentContainerStyle={{ alignItems: 'center' }}>
+            <TouchableOpacity
+              style={styles.imageWrapper}
+              onPress={isModelReady ? selectImage : undefined}>
+              {image && <Image source={image} style={styles.imageContainer} />}
+
+              {isModelReady && !image && (
+                <Text style={styles.transparentText}>Tap to choose image</Text>
+              )}
+            </TouchableOpacity>
+
+            <View>
+              <View style={{ height: '0.5%' }}>
+                <WebView
+                  ref={ref => webref.current = ref}
+                  automaticallyAdjustContentInsets={false}
+                  source={{ html }}
+                  onMessage={onMessage}
+                />
+              </View>
+              <Text style={styles.label}>Category</Text>
+              <View style={styles.dropdownCategory}>
+                <DropDownPicker
+                  style={styles.dropdown}
+                  open={categoryOpen}
+                  value={categoryValue}
+                  items={category}
+                  setOpen={setCategoryOpen}
+                  setValue={setCategoryValue}
+                  setItems={setCategory}
+                  placeholder="Select Category"
+                  placeholderStyle={styles.placeholderStyles}
+                  onChangeValue={text => setCategoryValue(text)}
+                />
+              </View>
+              <Text style={styles.label}>Item</Text>
+              <TextInput
+                style={styles.input}
+                selectionColor={'#5188E3'}
+                onChangeText={text => setItemClass(text)}
+                value={itemClass}
+              />
+              <Text style={styles.label}>Price</Text>
+              <TextInput
+                style={styles.input}
+                selectionColor={'#5188E3'}
+                onChangeText={text => setPrice(text)}
+                value={price}
+              />
+              <Text style={styles.label}>Count</Text>
+              <TextInput
+                style={styles.input}
+                selectionColor={'#5188E3'}
+                onChangeText={text => setTotalCount(text)}
+                value={totalCount}
+              />
+              <Text style={styles.label}>Expire Date</Text>
+              <TextInput
+                style={styles.input}
+                selectionColor={'#5188E3'}
+                onChangeText={text => setExpireDate(text)}
+                value={expireDate}
+              />
+              <TouchableOpacity style={styles.submitButton} disabled={parseInt(totalCount) === 0} onPress={onSubmit}>
+                <Text style={[styles.text, { color: '#fff', textAlign: 'center' }]}>
+                  {isPredictStart ? "Predicting..." : "Submit"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+    </>
   )
 }
 
@@ -302,7 +335,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center'
   },
   loadingContainer: {
     flexDirection: 'row',
