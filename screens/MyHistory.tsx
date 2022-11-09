@@ -80,9 +80,11 @@ const MyHistory = ({ navigation }: any) => {
 
           parseData.map(item => {
             console.log('item: ', item)
-            console.log('iternal parser', JSON.parse(item[0]))
-            const orderItem: OrderHistoryType[] = JSON.parse(item[0])['orderItems']
-            historyData.push(...orderItem)
+            if (item[0] !== '') {
+              console.log('iternal parser', JSON.parse(item[0]))
+              const orderItem: OrderHistoryType[] = JSON.parse(item[0])['orderItems']
+              historyData.push(...orderItem)
+            } 
           })
           console.log('historyData', historyData)
           setMyHistoryList(historyData)
