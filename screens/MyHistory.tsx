@@ -33,13 +33,13 @@ const OrderScreen = ({ k, orderItem }: { k: number, orderItem: OrderHistoryType 
             <View style={{ marginRight: 10, alignSelf: 'center' }}>
               <Image
                 style={{ height: 80, width: 80 }}
-                source={{ uri: orderItem.imageUr }}
+                source={{ uri: orderItem.imageUri }}
               ></Image>
             </View>
             <View style={{ justifyContent: "center" }}>
               <Text style={styles.text}>Name : {orderItem.name}</Text>
               <Text style={styles.text}>Quntity : {orderItem.count}</Text>
-              <Text style={styles.text}>Cost : {orderItem.price * orderItem.count}</Text>
+              <Text style={styles.text}>Cost :${orderItem.price * orderItem.count}</Text>
               <Text style={styles.text}>Expire Date: {orderItem.expireDate}</Text>
               <Text style={styles.text}>Pickup Time : {orderItem.pickupTime}</Text>
               <Text style={styles.text}>Order Date: {orderItem.orderTime}</Text>
@@ -88,6 +88,7 @@ const MyHistory = ({ navigation }: any) => {
           setMyHistoryList(historyData)
         }
       }
+      setIsLoading(false)
     })()
   }
   return (
@@ -106,7 +107,10 @@ const MyHistory = ({ navigation }: any) => {
               <OrderScreen k={k} orderItem={v} />)}
           </ScrollView>
         ) :
-          !isLoading ?
+          isLoading ?
+            <>
+              <Text style={[styles.linkText, { color: '#000' }]}>Loading...</Text>
+            </> :
             <>
               <Text style={[styles.linkText, { color: '#000' }]}>No Items, Please Order</Text>
               <View style={{ justifyContent: 'center' }}>
@@ -129,9 +133,6 @@ const MyHistory = ({ navigation }: any) => {
                   </TouchableOpacity>
                 </View>
               </View>
-            </> :
-            <>
-              <Text style={[styles.linkText, { color: '#000' }]}>Loading...</Text>
             </>
 
 

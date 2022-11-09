@@ -88,11 +88,11 @@ const ManageInventory = ({ navigation }: any) => {
 
           parseData.map(item => {
             console.log('item: ', item)
-            if(item[0]!==''){
+            if (item[0] !== '') {
               const inventoryItem: InventoryItemType = JSON.parse(item[0])
               inventotyData.push(inventoryItem)
             }
-        
+
           })
           console.log('inventoryData', inventotyData)
           setInventoryItems(inventotyData)
@@ -117,35 +117,34 @@ const ManageInventory = ({ navigation }: any) => {
             {inventoryItems.map((v, k) =>
               <InventoryItemScreen k={k} orderItem={v} />)}
           </ScrollView>
-        ) : 
-       !isLoading ?   <>
-            <Text style={[styles.linkText, { color: '#000' }]}>No Inventories</Text>
-            <View style={{ justifyContent: 'center' }}>
-              <View>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('InventoryItems')}
-                  style={[
-                    styles.link,
-                    {
-                      margin: 5,
-                      paddingVertical: 10,
-                      alignItems: "center",
-                      width: "100%",
-                    },
-                  ]}
-                >
-                  <Text style={[styles.linkText, { padding: 5 }]}>
-                    Add Item
-                  </Text>
-                </TouchableOpacity>
+        ) :
+          isLoading ?
+            <>
+              <Text style={[styles.linkText, { color: '#000' }]}>Loading...</Text>
+            </>
+            : <>
+              <Text style={[styles.linkText, { color: '#000' }]}>No Inventories</Text>
+              <View style={{ justifyContent: 'center' }}>
+                <View>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('InventoryItems')}
+                    style={[
+                      styles.link,
+                      {
+                        margin: 5,
+                        paddingVertical: 10,
+                        alignItems: "center",
+                        width: "100%",
+                      },
+                    ]}
+                  >
+                    <Text style={[styles.linkText, { padding: 5 }]}>
+                      Add Item
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          </> :
-          <>
-           <Text style={[styles.linkText, { color: '#000' }]}>Loading...</Text>
-          </>
-        
-        
+            </>
       }
     </View>
   )

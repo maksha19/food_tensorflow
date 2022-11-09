@@ -20,7 +20,7 @@ type StatusTypes = "CATEGORY" | "VIEW" | "ORDER" | "SUCCESS";
 type CategoryTypes = "Dairy" | "Vegies" | "Sweeet" | "Others";
 export type ItemsValuesTypes = {
   name: string;
-  imageUr: string;
+  imageUri: string;
   price: number;
   expireDate: string;
   count: number,
@@ -31,7 +31,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
   Dairy: [
     {
       name: "Milk",
-      imageUr: "https://picsum.photos/id/29/200/300",
+      imageUri: "https://picsum.photos/id/29/200/300",
       price: 100,
       expireDate: "1/12/2022",
       count: 0,
@@ -42,8 +42,8 @@ const items: Record<string, ItemsValuesTypes[]> = {
   Vegies: [
     {
       name: "apple",
-      imageUr: "https://picsum.photos/id/28/200/300",
-      price: 200,
+      imageUri: 'https://event-image-1661263503210.s3.ap-southeast-1.amazonaws.com/photos/apple.png',
+      price: 4,
       expireDate: "2/12/2022",
       count: 0,
       isAdded: false
@@ -53,7 +53,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
   Sweeet: [
     {
       name: "sugar",
-      imageUr: "https://picsum.photos/id/2/200/300",
+      imageUri: "https://picsum.photos/id/2/200/300",
       price: 300,
       expireDate: "3/12/2022",
       count: 0,
@@ -64,7 +64,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
   Others: [
     {
       name: "covid mask",
-      imageUr: "https://picsum.photos/id/23/200/300",
+      imageUri: "https://picsum.photos/id/23/200/300",
       price: 400,
       expireDate: "4/12/2022",
       count: 0,
@@ -72,7 +72,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
     },
     {
       name: "ART kit",
-      imageUr: "https://picsum.photos/id/1/200/300",
+      imageUri: "https://picsum.photos/id/1/200/300",
       price: 401,
       expireDate: "4/12/2022",
       count: 0,
@@ -80,7 +80,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
     },
     {
       name: "Toys",
-      imageUr: "https://picsum.photos/id/7/200/300",
+      imageUri: "https://picsum.photos/id/7/200/300",
       price: 402,
       expireDate: "4/12/2022",
       count: 0,
@@ -111,12 +111,12 @@ const ViewsScreen = ({ k, selectedItem, addToCart }: { k: number, selectedItem: 
             <View style={{ marginRight: 10 }}>
               <Image
                 style={{ height: 80, width: 80 }}
-                source={{ uri: selectedItem.imageUr }}
+                source={{ uri: selectedItem.imageUri }}
               ></Image>
             </View>
             <View style={{ justifyContent: "center" }}>
               <Text>Name: {selectedItem.name}</Text>
-              <Text>Price : {selectedItem.price}</Text>
+              <Text>Price :${selectedItem.price}</Text>
               <Text>Expire Date: {selectedItem.expireDate}</Text>
             </View>
           </View>
@@ -184,13 +184,13 @@ const OrderScreen = ({ k, orderItem }: { k: number, orderItem: ItemsValuesTypes,
             <View style={{ marginRight: 10 }}>
               <Image
                 style={{ height: 80, width: 80 }}
-                source={{ uri: orderItem.imageUr }}
+                source={{ uri: orderItem.imageUri }}
               ></Image>
             </View>
             <View style={{ justifyContent: "center" }}>
               <Text>Name : {orderItem.name}</Text>
               <Text>Quntity : {orderItem.count}</Text>
-              <Text>Cost : {orderItem.price * orderItem.count}</Text>
+              <Text>Cost :${orderItem.price * orderItem.count}</Text>
               <Text>Expire Date: {orderItem.expireDate}</Text>
             </View>
           </View>
