@@ -18,7 +18,7 @@ export default function BeneficiaryBottomTabNavigator() {
 
   return (
     <BottomTab.Navigator
-      initialRouteName="Home"
+      initialRouteName="PlaceOrder"
       // tabBarOptions={{ activeTintColor: Colors[colorScheme].tint }}
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].tint,

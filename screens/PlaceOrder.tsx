@@ -18,11 +18,11 @@ import Toast from "react-native-toast-message";
 
 type StatusTypes = "CATEGORY" | "VIEW" | "ORDER" | "SUCCESS";
 type CategoryTypes = "Dairy" | "Vegies" | "Sweeet" | "Others";
-type ItemsValuesTypes = {
+export type ItemsValuesTypes = {
   name: string;
   imageUr: string;
   price: number;
-  date: string;
+  expireDate: string;
   count: number,
   isAdded: boolean
 };
@@ -33,7 +33,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
       name: "Milk",
       imageUr: "https://picsum.photos/id/29/200/300",
       price: 100,
-      date: "1/12/2022",
+      expireDate: "1/12/2022",
       count: 0,
       isAdded: false
     },
@@ -44,7 +44,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
       name: "apple",
       imageUr: "https://picsum.photos/id/28/200/300",
       price: 200,
-      date: "2/12/2022",
+      expireDate: "2/12/2022",
       count: 0,
       isAdded: false
     },
@@ -55,7 +55,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
       name: "sugar",
       imageUr: "https://picsum.photos/id/2/200/300",
       price: 300,
-      date: "3/12/2022",
+      expireDate: "3/12/2022",
       count: 0,
       isAdded: false
     },
@@ -66,7 +66,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
       name: "covid mask",
       imageUr: "https://picsum.photos/id/23/200/300",
       price: 400,
-      date: "4/12/2022",
+      expireDate: "4/12/2022",
       count: 0,
       isAdded: false
     },
@@ -74,7 +74,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
       name: "ART kit",
       imageUr: "https://picsum.photos/id/1/200/300",
       price: 401,
-      date: "4/12/2022",
+      expireDate: "4/12/2022",
       count: 0,
       isAdded: false
     },
@@ -82,7 +82,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
       name: "Toys",
       imageUr: "https://picsum.photos/id/7/200/300",
       price: 402,
-      date: "4/12/2022",
+      expireDate: "4/12/2022",
       count: 0,
       isAdded: false
     },
@@ -117,7 +117,7 @@ const ViewsScreen = ({ k, selectedItem, addToCart }: { k: number, selectedItem: 
             <View style={{ justifyContent: "center" }}>
               <Text>Name: {selectedItem.name}</Text>
               <Text>Price : {selectedItem.price}</Text>
-              <Text>Expire Date: {selectedItem.date}</Text>
+              <Text>Expire Date: {selectedItem.expireDate}</Text>
             </View>
           </View>
           <View
@@ -191,7 +191,7 @@ const OrderScreen = ({ k, orderItem }: { k: number, orderItem: ItemsValuesTypes,
               <Text>Name : {orderItem.name}</Text>
               <Text>Quntity : {orderItem.count}</Text>
               <Text>Cost : {orderItem.price * orderItem.count}</Text>
-              <Text>Expire Date: {orderItem.date}</Text>
+              <Text>Expire Date: {orderItem.expireDate}</Text>
             </View>
           </View>
         </View>
@@ -208,6 +208,7 @@ const PlaceOrder = () => {
   const [cartList, setCartList] = useState<any>([])
   const [orderItems, setOrderItems] = useState<ItemsValuesTypes[]>([])
   const [time, onChangeTimeText] = React.useState('');
+  const [tempTime,setTempTime] = useState('')
 
   const categoriesScreen = () => {
     return (
@@ -273,10 +274,17 @@ const PlaceOrder = () => {
   const placeOrder = async () => {
     const url = 'https://script.google.com/macros/s/AKfycbzVEqb-fZt8ronje_GVzeKajnfkdpS7GzEWpRJxgnMEP5jACRaH4CDVb5Y4a9AvPB4Dxg/exec'
 
-
+    const orderTime = new Date().toDateString()
+    const postData = orderItems.map(item => {
+      return {
+        ...item,
+        pickupTime: time,
+        orderTime
+      }
+    })
     const response = await axios.post(
       url,
-      { orderItems, time },
+      { orderItems :postData },
       {
         headers: {
           "Content-Type": "text/plain;charset=utf-8",
@@ -286,6 +294,7 @@ const PlaceOrder = () => {
     if (response.status === 200) {
       const statusCode = response.data.statusCode;
       if (statusCode === "201") {
+        setTempTime(time)
         Toast.show({
           type: 'success',
           text1: '👋  Order Placed Successfully ',
@@ -389,27 +398,27 @@ const PlaceOrder = () => {
           ) : (
             <>
               <Text style={[styles.linkText, { color: '#000' }]}>No Item in cart</Text>
-              <View style={{  justifyContent: 'center' }}>
-              <View>
-                <TouchableOpacity
-                  onPress={() => setCurrentState('CATEGORY')}
+              <View style={{ justifyContent: 'center' }}>
+                <View>
+                  <TouchableOpacity
+                    onPress={() => setCurrentState('CATEGORY')}
 
-                  style={[
-                    styles.link,
-                    {
-                      margin: 5,
-                      paddingVertical: 10,
-                      alignItems: "center",
-                      width: "100%",
-                    },
-                  ]}
-                >
-                  <Text style={[styles.linkText, { padding: 5 }]}>
-                    Go to Main Screen
-                  </Text>
-                </TouchableOpacity>
+                    style={[
+                      styles.link,
+                      {
+                        margin: 5,
+                        paddingVertical: 10,
+                        alignItems: "center",
+                        width: "100%",
+                      },
+                    ]}
+                  >
+                    <Text style={[styles.linkText, { padding: 5 }]}>
+                      Go to Main Screen
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
             </>
           )
           )
@@ -417,10 +426,10 @@ const PlaceOrder = () => {
         {
           currentState === "SUCCESS" && <>
             <Text style={[styles.linkText, { color: '#000' }]}>Your Order has beed Placed</Text>
-            <Text style={[styles.linkText, { color: '#000' }]}>Please pick up before {time}</Text>
+            <Text style={[styles.linkText, { color: '#000' }]}>Please pick up before {tempTime}</Text>
             <Text style={[styles.linkText, { color: '#000' }]}>Thank You! </Text>
 
-            <View style={{  justifyContent: 'center' }}>
+            <View style={{ justifyContent: 'center' }}>
               <View>
                 <TouchableOpacity
                   onPress={() => setCurrentState('CATEGORY')}
