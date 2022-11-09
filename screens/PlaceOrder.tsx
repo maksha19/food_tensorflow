@@ -142,6 +142,7 @@ const ViewsScreen = ({ k, selectedItem, addToCart }: { k: number, selectedItem: 
               <View>
                 <TouchableOpacity
                   onPress={() => addToCart(selectedItem.name, count)}
+                  disabled={selectedItem.isAdded}
                   style={[
                     styles.link,
                     {
@@ -242,6 +243,17 @@ const PlaceOrder = () => {
       return [...oldCart, newCat]
     })
     console.log(cartList)
+
+    setIteamValues(item => {
+      return item?.map(v => {
+        console.log('item', v)
+        if (v.name === name) {
+          v.isAdded = true;
+        }
+        return v
+      })
+    })
+
   }
 
   const orderViewState = () => {
@@ -297,7 +309,7 @@ const PlaceOrder = () => {
   const navigationBetweenScreen = (isForward: boolean) => {
     const index = screenStatus.indexOf(currentState)
     let tempStatus: StatusTypes = currentState
-    if (isForward && index >= 0 && index < 2)  {
+    if (isForward && index >= 0 && index < 2) {
       tempStatus = screenStatus[index + 1]
     } else if (!isForward && index < 3 && index > 0) {
       tempStatus = screenStatus[index - 1]
@@ -309,7 +321,7 @@ const PlaceOrder = () => {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}>
-      <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', backgroundColor: "#ecf0f1", paddingTop: 10,paddingHorizontal:20}}>
+      <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', backgroundColor: "#ecf0f1", paddingTop: 10, paddingHorizontal: 20 }}>
         <View  >
           <TouchableOpacity
             style={{ flexDirection: 'row' }}
@@ -377,12 +389,27 @@ const PlaceOrder = () => {
           ) : (
             <>
               <Text style={[styles.linkText, { color: '#000' }]}>No Item in cart</Text>
-              <TouchableOpacity
-                onPress={() => setCurrentState('CATEGORY')}
-                style={[styles.link,]}
-              >
-                <Text style={[styles.linkText]}>Go to Main Screen</Text>
-              </TouchableOpacity>
+              <View style={{  justifyContent: 'center' }}>
+              <View>
+                <TouchableOpacity
+                  onPress={() => setCurrentState('CATEGORY')}
+
+                  style={[
+                    styles.link,
+                    {
+                      margin: 5,
+                      paddingVertical: 10,
+                      alignItems: "center",
+                      width: "100%",
+                    },
+                  ]}
+                >
+                  <Text style={[styles.linkText, { padding: 5 }]}>
+                    Go to Main Screen
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
             </>
           )
           )
@@ -393,12 +420,27 @@ const PlaceOrder = () => {
             <Text style={[styles.linkText, { color: '#000' }]}>Please pick up before {time}</Text>
             <Text style={[styles.linkText, { color: '#000' }]}>Thank You! </Text>
 
-            <TouchableOpacity
-              onPress={() => setCurrentState('CATEGORY')}
-              style={[styles.link]}
-            >
-              <Text style={[styles.linkText]}>Go to Main Screen</Text>
-            </TouchableOpacity>
+            <View style={{  justifyContent: 'center' }}>
+              <View>
+                <TouchableOpacity
+                  onPress={() => setCurrentState('CATEGORY')}
+
+                  style={[
+                    styles.link,
+                    {
+                      margin: 5,
+                      paddingVertical: 10,
+                      alignItems: "center",
+                      width: "100%",
+                    },
+                  ]}
+                >
+                  <Text style={[styles.linkText, { padding: 5 }]}>
+                    Go to Main Screen
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </>
         }
       </View>
