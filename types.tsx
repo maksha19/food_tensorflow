@@ -7,7 +7,7 @@ export type RootStackParamList = {
 
 export type BottomTabParamList = {
   Home: undefined;
-  ManageOrder: undefined;
+  ManageInventory: undefined;
   InventoryItems: undefined;
   PlaceOrder: undefined;
   MyHistory: undefined;

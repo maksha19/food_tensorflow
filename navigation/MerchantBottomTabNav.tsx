@@ -4,7 +4,7 @@ import * as React from "react";
 
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
-import ManageOrder from "../screens/ManageOrder";
+import ManageInventory from "../screens/ManageInventory";
 import InventoryItems from "../screens/InventoryItems";
 
 import {
@@ -41,13 +41,13 @@ export default function MerchantBottomTabNavigator() {
         }}
       />
       <BottomTab.Screen
-        name="ManageOrder"
-        component={ManageOrder}
+        name="ManageInventory"
+        component={ManageInventory}
         options={{
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="inbox" color={color} />
           ),
-          tabBarLabel: "Manage Orders",
+          tabBarLabel: "Manage Inventory",
         }}
       />
 

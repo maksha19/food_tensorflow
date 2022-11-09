@@ -66,7 +66,6 @@ const InventoryItems = () => {
           alert('Sorry, we need camera roll permissions to make this work!')
         }
       }
-
     })()
 
   }, [])
@@ -124,6 +123,7 @@ const InventoryItems = () => {
         const source = { uri: response.uri }
         setImage(source)
         setIsCocoPredictStart(true)
+        setIsTesseractPredictStart(true)
         classifyImage(response.uri)
 
         // to get expireDate and price information from tesseract model
@@ -150,14 +150,14 @@ const InventoryItems = () => {
 
 
   const onSubmit = async () => {
-    console.log({ categoryValue, price, totalCount, expireDate, item: itemClass }, 'data');
-
+    const imageUri = 'https://event-image-1661263503210.s3.ap-southeast-1.amazonaws.com/photos/apple.png'
+    console.log({ categoryValue, price, totalCount, expireDate, item: itemClass ,imageUri  }, 'data');
 
     const url =
       "https://script.google.com/macros/s/AKfycbyiGvUENeo-vPuKF_YFJ5b0Ht5r7MEFgwrGRvWpsD-_plf1zdDcDdnLknvRlAc9vNM-GQ/exec";
     const response = await axios.post(
       url,
-      { categoryValue, price, totalCount, expireDate, item: itemClass },
+      { categoryValue, price, totalCount, expireDate, item: itemClass ,imageUri },
       {
         headers: {
           "Content-Type": "text/plain;charset=utf-8",
@@ -200,7 +200,7 @@ const InventoryItems = () => {
         setPrice(item[1].trim())
       }
     })
-    setIsTesseractPredictStart(true)
+    setIsTesseractPredictStart(false)
     // console.log('INJECTED_JAVASCRIPT', event.nativeEvent.data)
   }
 
@@ -344,7 +344,7 @@ label{
               />
               <TouchableOpacity style={styles.submitButton} disabled={parseInt(totalCount) === 0} onPress={onSubmit}>
                 <Text style={[styles.text, { color: '#fff', textAlign: 'center' }]}>
-                  {isCocoPredictStart && isTesseractPredictStart ? "Predicting..." : "Submit"}
+                  {(isCocoPredictStart || isTesseractPredictStart) ? "Predicting..." : "Submit"}
                 </Text>
               </TouchableOpacity>
             </View>
