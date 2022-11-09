@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-const HomeScreen = ({ navigation, route, options, back }: any) => {
+const HomeScreen = ({ navigation }: any) => {
   const moveToScreen = (user: string) => {
     if (user === "beneficiary") {
       navigation.push("Beneficiary");

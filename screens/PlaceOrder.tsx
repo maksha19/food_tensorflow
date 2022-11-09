@@ -13,6 +13,8 @@ import {
   Platform
 } from "react-native";
 import { EvilIcons } from '@expo/vector-icons';
+import axios from "axios";
+import Toast from "react-native-toast-message";
 
 type StatusTypes = "CATEGORY" | "VIEW" | "ORDER" | "SUCCESS";
 type CategoryTypes = "Dairy" | "Vegies" | "Sweeet" | "Others";
@@ -88,6 +90,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
 };
 
 const categories = ["Dairy", "Vegies", "Sweeet", "Others"];
+const screenStatus: StatusTypes[] = ["CATEGORY", "VIEW", "ORDER", "SUCCESS"];
 
 
 const ViewsScreen = ({ k, selectedItem, addToCart }: { k: number, selectedItem: ItemsValuesTypes, addToCart: Function }) => {
@@ -255,8 +258,33 @@ const PlaceOrder = () => {
     setCurrentState('ORDER')
   }
 
-  const placeOrder = () => {
-    setCurrentState('SUCCESS')
+  const placeOrder = async () => {
+    const url = 'https://script.google.com/macros/s/AKfycbzVEqb-fZt8ronje_GVzeKajnfkdpS7GzEWpRJxgnMEP5jACRaH4CDVb5Y4a9AvPB4Dxg/exec'
+
+
+    const response = await axios.post(
+      url,
+      { orderItems, time },
+      {
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
+      }
+    );
+    if (response.status === 200) {
+      const statusCode = response.data.statusCode;
+      if (statusCode === "201") {
+        Toast.show({
+          type: 'success',
+          text1: '👋  Order Placed Successfully ',
+        });
+        setCurrentState('SUCCESS')
+        setOrderItems([])
+        setCartList([])
+        onChangeTimeText('')
+      }
+    }
+
   }
 
 
@@ -266,18 +294,50 @@ const PlaceOrder = () => {
     setIteamValues(items[category])
   };
 
+  const navigationBetweenScreen = (isForward: boolean) => {
+    const index = screenStatus.indexOf(currentState)
+    let tempStatus: StatusTypes = currentState
+    if (isForward && index >= 0 && index < 2)  {
+      tempStatus = screenStatus[index + 1]
+    } else if (!isForward && index < 3 && index > 0) {
+      tempStatus = screenStatus[index - 1]
+    }
+    setCurrentState(tempStatus)
+
+  }
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}>
+      <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', backgroundColor: "#ecf0f1", paddingTop: 10,paddingHorizontal:20}}>
+        <View  >
+          <TouchableOpacity
+            style={{ flexDirection: 'row' }}
+            onPress={() => navigationBetweenScreen(false)}>
+            <TabBarIcon name="arrow-left" color={'#000'} />
+            <Text style={{ paddingTop: 5 }}>Back </Text>
+          </TouchableOpacity>
+        </View>
+        <View >
+          <TouchableOpacity
+            style={{ flexDirection: 'row' }}
+            onPress={() => navigationBetweenScreen(true)}>
+            <Text style={{ paddingTop: 5 }}>Next </Text>
+            <TabBarIcon name="arrow-right" color={'#000'} />
+          </TouchableOpacity>
+        </View>
+      </View>
       <View style={styles.container}>
+
         {currentState !== "ORDER" && currentState !== "SUCCESS" &&
           <View>
-            <TouchableOpacity style={{ width: '100%', marginTop: '-5%', marginRight: '13%', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-end' }}
+            <TouchableOpacity style={{ width: '100%', flexDirection: 'row', }}
               onPress={() => orderViewState()}>
-              <Text>View Cart</Text>
+              <Text style={{ paddingTop: 5 }}>View Cart</Text>
               <TabBarIcon name="archive" color={'#000'} />
             </TouchableOpacity>
-          </View>}
+          </View>
+        }
         {currentState === "CATEGORY" && categoriesScreen()}
         {currentState === "VIEW" &&
           (ItemsValues && ItemsValues.length > 0 ? (
@@ -288,7 +348,6 @@ const PlaceOrder = () => {
           ) :
             (
               <><Text style={[styles.linkText, { color: '#000' }]}>No Item in these categories</Text></>
-
             ))
         }
         {
@@ -316,7 +375,15 @@ const PlaceOrder = () => {
             </>
 
           ) : (
-            <><Text style={[styles.linkText, { color: '#000' }]}>No Item in cart</Text></>
+            <>
+              <Text style={[styles.linkText, { color: '#000' }]}>No Item in cart</Text>
+              <TouchableOpacity
+                onPress={() => setCurrentState('CATEGORY')}
+                style={[styles.link,]}
+              >
+                <Text style={[styles.linkText]}>Go to Main Screen</Text>
+              </TouchableOpacity>
+            </>
           )
           )
         }
@@ -325,9 +392,20 @@ const PlaceOrder = () => {
             <Text style={[styles.linkText, { color: '#000' }]}>Your Order has beed Placed</Text>
             <Text style={[styles.linkText, { color: '#000' }]}>Please pick up before {time}</Text>
             <Text style={[styles.linkText, { color: '#000' }]}>Thank You! </Text>
+
+            <TouchableOpacity
+              onPress={() => setCurrentState('CATEGORY')}
+              style={[styles.link]}
+            >
+              <Text style={[styles.linkText]}>Go to Main Screen</Text>
+            </TouchableOpacity>
           </>
         }
       </View>
+      <Toast
+        position='bottom'
+        bottomOffset={30}
+      />
     </KeyboardAvoidingView>
   );
 };
