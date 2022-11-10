@@ -41,8 +41,8 @@ const InventoryItems = () => {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [category, setCategory] = useState([
     { label: "Dairy", value: "Dairy" },
-    { label: "Vegies", value: "Vegies" },
-    { label: "Sweeet", value: "Sweeet" },
+    { label: "Veggies", value: "Veggies" },
+    { label: "Sweet", value: "Sweet" },
     { label: "Othes", value: "Others" },
   ]);
 

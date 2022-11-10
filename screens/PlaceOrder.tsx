@@ -17,7 +17,7 @@ import axios from "axios";
 import Toast from "react-native-toast-message";
 
 type StatusTypes = "CATEGORY" | "VIEW" | "ORDER" | "SUCCESS";
-type CategoryTypes = "Dairy" | "Vegies" | "Sweeet" | "Others";
+type CategoryTypes = "Dairy" | "Veggies" | "Sweet" | "Others";
 export type ItemsValuesTypes = {
   name: string;
   imageUri: string;
@@ -39,7 +39,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
     },
   ],
 
-  Vegies: [
+  Veggies: [
     {
       name: "apple",
       imageUri: 'https://event-image-1661263503210.s3.ap-southeast-1.amazonaws.com/photos/apple.png',
@@ -50,7 +50,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
     },
   ],
 
-  Sweeet: [
+  Sweet: [
     {
       name: "sugar",
       imageUri: "https://picsum.photos/id/2/200/300",
@@ -89,7 +89,7 @@ const items: Record<string, ItemsValuesTypes[]> = {
   ],
 };
 
-const categories = ["Dairy", "Vegies", "Sweeet", "Others"];
+const categories = ["Dairy", "Veggies", "Sweet", "Others"];
 const screenStatus: StatusTypes[] = ["CATEGORY", "VIEW", "ORDER", "SUCCESS"];
 
 
